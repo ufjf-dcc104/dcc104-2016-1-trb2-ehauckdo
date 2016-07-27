@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Bloody-Red Mars</title>
+		<style>
+			canvas {
+				border: 1px solid black;
+			}
+			body{
+				width: 500px;
+				margin: auto;
+			}
+		</style>
+		<script src="Dialog.js"></script>
+		<script src="Background.js"></script>
+		<script src="Colisao.js"></script>
+		<script src="Bullet1.js"></script>
+		<script src="Bullet2.js"></script>
+		<script src="Bullet3.js"></script>
+		<script src="Bullet4.js"></script>
+		<script src="Bullet5.js"></script>
+		<script src="Bullet6.js"></script>
+		<script src="Player.js"></script>
+		<script src="Enemy1.js"></script>
+		<script src="Enemy2.js"></script>
+		<script src="Enemy3.js"></script>
+		<script src="Enemy4.js"></script>
+		<script src="Enemy5.js"></script>
+		<script src="Enemy6.js"></script>
+		<script src="Enemy7.js"></script>
+		<script src="Boss.js"></script>
+		<script src="Explosion.js"></script>
+		<script src="PowerUp.js"></script>
+		<script src="Score.js"></script>
+		<script src="Spawner.js"></script>
+		<script src="Stage0.js"></script>
+		<script src="Stage1.js"></script>
+		<script src="Stage2.js"></script>
+		<script src="GameOver.js"></script>
+		<script src="Bomb.js"></script>
+		<script src="SoundLib.js"></script>
+		<script src="ImageResources.js"></script>
+		
+	</head>
+	<body>
+	<h1>Bloody-Red Mars</h1>
+	 <br />
+	A - Shoot &nbsp; &nbsp; &nbsp; &nbsp; Enter - Skip<br />
+	S - Shield &nbsp; &nbsp; &nbsp; &nbsp; Directionals - Move<br />
+	D - Bomb  &nbsp; &nbsp; &nbsp; &nbsp; +/- - Mute/Unmute<br /><br />
+	
+
+	<canvas width="450" height="700">
+		Seu navegador não tem suporte ao canvas!
+		Atualize seu navegador.
+	</canvas>
+	<script>
+
+		var tela = document.getElementsByTagName("canvas")[0];
+		var ctx = tela.getContext("2d");
+		var fps = 60;
+		var dt = 1/fps;
+		var limitTop = 0;
+		var limitBottom = 700;
+		var limitLeft = 0;
+		var limitRight = 450;
+
+		var soundlib = new SoundLib();
+		soundlib.load("tiro", "sons/tiro1.mp3");
+		soundlib.load("laser", "sons/laser2.mp3");
+		soundlib.load("explosao", "sons/explosao1.mp3");
+		soundlib.load("stage1_ost", "sons/stage1_ost.mp3");
+		soundlib.load("stage2_ost", "sons/stage2_ost.mp3");
+		soundlib.load("boss_ost", "sons/boss_ost.mp3");
+
+		var imglib = new ImageResources();
+		imglib.addImage("intro", "images/intro_image.png");
+		imglib.addImage("player_ship", "images/player_ship.png");
+    	imglib.addImage("bomb", "images/bomb1-a.png");
+    	imglib.addImage("enemy1", "images/enemy_1.png");
+    	imglib.addImage("enemy2", "images/enemy_2.png");
+    	imglib.addImage("enemy3", "images/enemy_3.png");
+    	imglib.addImage("enemy4", "images/enemy_4.png");
+    	imglib.addImage("enemy5", "images/enemy_5.png");
+    	imglib.addImage("enemy6", "images/enemy_6.png");
+    	imglib.addImage("boss", "images/boss.png");
+    	imglib.addImage("cannon", "images/boss-2.png");
+    	imglib.addImage("space_background", "images/space_background.png");
+    	imglib.addImage("space_background_parallax", "images/space_background_parallax.png");
+    	imglib.addImage("mars_background", "images/mars_background.png");
+    	imglib.addImage("bullet1", "images/bullet1.png");
+    	imglib.addImage("bullet2", "images/bullet2.png");
+    	imglib.addImage("bullet3", "images/bullet3.png");
+    	imglib.addImage("bullet4", "images/bullet4.png");
+    	imglib.addImage("bullet5", "images/bullet5.png");
+    	imglib.addImage("bullet6", "images/bullet6.png");
+    	imglib.addImage("powerup", "images/powerup.png");
+    	imglib.addImage("explosion", "images/explosion.png");
+    	imglib.addImage("dialog", "images/dialog.png");
+    	imglib.addImage("chars", "images/chars.png");
+    	
+
+		var player = new Player();
+		var score = new Score(5, 60);
+		var stage = new Stage0();
+		
+		function teclaPressionada(e){
+			try{
+				switch(e.keyCode){
+					case 65:
+						stage.player.iniciarTiro(true);
+						break;
+					case 83: 
+						stage.player.ativarEscudo();
+						break;
+					case 68: 
+						stage.player.soltarBomba();
+					break;
+					case 107:
+						soundlib.volume(1);				
+						break;
+					case 109:
+						soundlib.volume(0);				
+						break;		
+					case 13:
+						stage.proximo();				
+						break;
+					e.preventDefault();
+					case 37:
+						stage.player.comecaMovimento("left")
+						break;
+					case 39:
+						stage.player.comecaMovimento("right");				
+						break;
+					case 38:
+						stage.player.comecaMovimento("up");				
+						break;
+					case 40:
+						stage.player.comecaMovimento("down");				
+						break;
+							
+				}
+			}catch(err){
+
+			}
+			
+
+		}
+
+		function teclaSolta(e){
+			try{
+				switch(e.keyCode){
+					case 65:
+						stage.player.iniciarTiro(false);
+						break;
+					case 37:
+						stage.player.paraMovimento("left");
+						break;
+					case 39:
+						stage.player.paraMovimento("right");
+						break;					
+					case 38:
+						stage.player.paraMovimento("up");	
+						break;
+					case 40:
+						stage.player.paraMovimento("down");
+						break;						
+					
+				}
+			}catch(err){
+
+			}
+		}
+
+
+		function runStage(){
+			stage = stage.passo();
+		}
+
+		setInterval(runStage, 1000/fps);
+		addEventListener("keydown", teclaPressionada);
+		addEventListener("keyup", teclaSolta);
+
+	</script>
+	</body>
+</html>
+
+
+
+
+
+
