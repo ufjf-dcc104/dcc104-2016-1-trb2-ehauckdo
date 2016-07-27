@@ -126,17 +126,21 @@
 					case 13:
 						stage.proximo();				
 						break;
-					e.preventDefault();
+					
 					case 37:
+						e.preventDefault();
 						stage.player.comecaMovimento("left")
 						break;
 					case 39:
+						e.preventDefault();
 						stage.player.comecaMovimento("right");				
 						break;
 					case 38:
+						e.preventDefault();
 						stage.player.comecaMovimento("up");				
 						break;
 					case 40:
+						e.preventDefault();
 						stage.player.comecaMovimento("down");				
 						break;
 							
